@@ -30,7 +30,6 @@ public class Contacts {
                 new ArrayList<Phone>() {{
                     add(new Phone("personal", "+420603414256"));
                 }},
-                new Date(new Date().getTime() - (20L * 365L * 24L * 3600L * 1000L)),
                 "best friend",
                 "Best company inc."
         ));
@@ -46,7 +45,6 @@ public class Contacts {
                     add(new Phone("personal", "+420608254365"));
                     add(new Phone("work", "+420777254125"));
                 }},
-                new Date(new Date().getTime() - (19L * 365L * 24L * 3600L * 1000L)),
                 "best friend\nforever",
                 "Best company inc."
         ));

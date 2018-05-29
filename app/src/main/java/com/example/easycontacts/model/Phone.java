@@ -5,8 +5,8 @@ package com.example.easycontacts.model;
  */
 
 public class Phone {
-    private String type;
-    private String phone;
+    public String type;
+    public String phone;
 
     public Phone(String type, String address) {
         this.type = type;

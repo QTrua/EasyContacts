@@ -20,8 +20,9 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
 
     private List<Contact> contacts;
 
-    public ContactListAdapter(List<Contact> contacts) {
+    public void setContacts(List<Contact> contacts) {
         this.contacts = contacts;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -40,7 +41,7 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
 
     @Override
     public int getItemCount() {
-        return contacts.size();
+        return contacts != null ? contacts.size() : 0;
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -53,8 +54,8 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
             TextView textTitleView = itemView.findViewById(R.id.textTitleView);
             TextView textSubtitleView = itemView.findViewById(R.id.textSubtitleView);
 
-            textTitleView.setText(contact.getFirstName() + " " + contact.getLastName());
-            textSubtitleView.setText(contact.getPhones().get(0).getPhone());
+            textTitleView.setText(contact.getDisplayName());
+            textSubtitleView.setText(contact.getPrimaryContactInfo());
         }
     }
 }

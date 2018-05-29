@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,14 @@ import android.view.ViewGroup;
 import com.example.easycontacts.R;
 import com.example.easycontacts.adapter.ContactListAdapter;
 import com.example.easycontacts.example.Contacts;
+import com.example.easycontacts.model.Contact;
+import com.example.easycontacts.network.NetworkManager;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 /**
@@ -21,6 +30,7 @@ import com.example.easycontacts.example.Contacts;
  */
 public class ContactListFragment extends Fragment {
 
+    private NetworkManager networkManager = new NetworkManager();
 
     public ContactListFragment() {
         // Required empty public constructor
@@ -39,8 +49,23 @@ public class ContactListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         RecyclerView contactListView = view.findViewById(R.id.listContacts);
-        ContactListAdapter adapter = new ContactListAdapter(Contacts.contacts);
+        final ContactListAdapter adapter = new ContactListAdapter();
         contactListView.setAdapter(adapter);
+
+        networkManager.getContactService()
+                .listContacts()
+                .enqueue(new Callback<List<Contact>>() {
+                    @Override
+                    public void onResponse(Call<List<Contact>> call, Response<List<Contact>> response) {
+                        List<Contact> contacts = response.body();
+                        adapter.setContacts(contacts);
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<Contact>> call, Throwable t) {
+                        Log.e(getClass().getSimpleName(), t.toString());
+                    }
+                });
 
     }
 }

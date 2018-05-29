@@ -1,5 +1,10 @@
 package com.example.easycontacts.model;
 
+import android.text.TextUtils;
+
+import com.squareup.moshi.Json;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -8,27 +13,37 @@ import java.util.List;
  */
 
 public class Contact {
-    private String UUID;
+    @Json(name = "uuid")
+    public String UUID;
 
-    private String firstName;
-    private String lastName;
+    @Json(name = "first_name")
+    public String firstName;
 
-    private List<Email> emails;
-    private List<Address> addresses;
-    private List<Phone> phones;
+    @Json(name = "last_name")
+    public String lastName;
 
-    private Date birthday;
-    private String note;
-    private String organization;
+    @Json(name = "emails")
+    public List<Email> emails;
 
-    public Contact(String UUID, String firstName, String lastName, List<Email> emails, List<Address> addresses, List<Phone> phones, Date birthday, String note, String organization) {
+    @Json(name = "addresses")
+    public List<Address> addresses;
+
+    @Json(name = "phones")
+    public List<Phone> phones;
+
+    @Json(name = "note")
+    public String note;
+
+    @Json(name = "organization")
+    public String organization;
+
+    public Contact(String UUID, String firstName, String lastName, List<Email> emails, List<Address> addresses, List<Phone> phones, String note, String organization) {
         this.UUID = UUID;
         this.firstName = firstName;
         this.lastName = lastName;
         this.emails = emails;
         this.addresses = addresses;
         this.phones = phones;
-        this.birthday = birthday;
         this.note = note;
         this.organization = organization;
     }
@@ -81,14 +96,6 @@ public class Contact {
         this.phones = phones;
     }
 
-    public Date getBirthday() {
-        return birthday;
-    }
-
-    public void setBirthday(Date birthday) {
-        this.birthday = birthday;
-    }
-
     public String getNote() {
         return note;
     }
@@ -103,5 +110,35 @@ public class Contact {
 
     public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+    public String getDisplayName() {
+        List<String> parts = new ArrayList<>();
+
+        if (!TextUtils.isEmpty(getFirstName())) {
+            parts.add(getFirstName());
+        }
+
+        if (!TextUtils.isEmpty(getLastName())) {
+            parts.add(getLastName());
+        }
+
+        return TextUtils.join(" ", parts);
+    }
+
+    public String getPrimaryContactInfo() {
+        if (getPhones() != null && getPhones().size() != 0) {
+            return getPhones().get(0).getPhone();
+        }
+
+        if (getEmails() != null && getEmails().size() != 0) {
+            return getEmails().get(0).getEmail();
+        }
+
+        if (getAddresses() != null && getAddresses().size() != 0) {
+            return getAddresses().get(0).getAddress();
+        }
+
+        return null;
     }
 }
