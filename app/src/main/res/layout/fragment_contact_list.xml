@@ -13,6 +13,7 @@
         tools:listitem="@layout/adapter_item_contact" />
 
     <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabAddContact"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"

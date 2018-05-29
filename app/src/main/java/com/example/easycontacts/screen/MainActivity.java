@@ -5,7 +5,8 @@ import android.os.Bundle;
 
 import com.example.easycontacts.R;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+    implements ContactListFragment.OnContactListInteractionListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,6 +20,15 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.frameContainer, new ContactListFragment())
+                .commit();
+    }
+
+    @Override
+    public void onCreateContact() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frameContainer, new ContactAddFragment())
+                .addToBackStack(null)
                 .commit();
     }
 }

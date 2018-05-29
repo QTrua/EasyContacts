@@ -1,9 +1,11 @@
 package com.example.easycontacts.screen;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,6 +34,8 @@ public class ContactListFragment extends Fragment {
 
     private NetworkManager networkManager = new NetworkManager();
 
+    private ContactListAdapter contactListAdapter = new ContactListAdapter();
+
     public ContactListFragment() {
         // Required empty public constructor
     }
@@ -49,8 +53,22 @@ public class ContactListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         RecyclerView contactListView = view.findViewById(R.id.listContacts);
-        final ContactListAdapter adapter = new ContactListAdapter();
-        contactListView.setAdapter(adapter);
+        contactListView.setAdapter(contactListAdapter);
+
+        FloatingActionButton fab = view.findViewById(R.id.fabAddContact);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    listener.onCreateContact();
+                }
+            }
+        });
+
+        loadContacts();
+    }
+
+    private void loadContacts() {
 
         networkManager.getContactService()
                 .listContacts()
@@ -58,7 +76,7 @@ public class ContactListFragment extends Fragment {
                     @Override
                     public void onResponse(Call<List<Contact>> call, Response<List<Contact>> response) {
                         List<Contact> contacts = response.body();
-                        adapter.setContacts(contacts);
+                        contactListAdapter.setContacts(contacts);
                     }
 
                     @Override
@@ -66,6 +84,30 @@ public class ContactListFragment extends Fragment {
                         Log.e(getClass().getSimpleName(), t.toString());
                     }
                 });
+    }
 
+    private OnContactListInteractionListener listener;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        if (context instanceof OnContactListInteractionListener) {
+            listener = (OnContactListInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.getClass().getName() +
+                    " does not implement OnContactListInteractionListener"
+            );
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
+    }
+
+    public interface OnContactListInteractionListener {
+        void onCreateContact();
     }
 }
