@@ -1,6 +1,7 @@
 package com.example.easycontacts.network;
 
 import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.moshi.MoshiConverterFactory;
 
@@ -15,8 +16,16 @@ public class NetworkManager {
     private ContactService contactService;
 
     public NetworkManager() {
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .addInterceptor(loggingInterceptor)
+                .build();
+
         retrofit = new Retrofit.Builder()
                 .baseUrl("https://contactee.jankrecek.cz/test@example.com/")
+                .client(okHttpClient)
                 .addConverterFactory(MoshiConverterFactory.create())
                 .build();
 
