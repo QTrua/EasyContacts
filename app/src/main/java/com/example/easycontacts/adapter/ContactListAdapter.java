@@ -5,8 +5,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.example.easycontacts.R;
+import com.example.easycontacts.model.Contact;
 
 import java.util.List;
 
@@ -15,6 +17,12 @@ import java.util.List;
  */
 
 public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.ViewHolder> {
+
+    private List<Contact> contacts;
+
+    public ContactListAdapter(List<Contact> contacts) {
+        this.contacts = contacts;
+    }
 
     @NonNull
     @Override
@@ -26,18 +34,27 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-
+        Contact contact = contacts.get(position);
+        holder.onBind(contact);
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return contacts.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
         public ViewHolder(View itemView) {
             super(itemView);
+        }
+
+        void onBind(Contact contact) {
+            TextView textTitleView = itemView.findViewById(R.id.textTitleView);
+            TextView textSubtitleView = itemView.findViewById(R.id.textSubtitleView);
+
+            textTitleView.setText(contact.getFirstName() + " " + contact.getLastName());
+            textSubtitleView.setText(contact.getPhones().get(0).getPhone());
         }
     }
 }
