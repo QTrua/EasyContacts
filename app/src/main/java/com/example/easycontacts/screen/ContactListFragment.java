@@ -36,6 +36,8 @@ public class ContactListFragment extends Fragment {
 
     private ContactListAdapter contactListAdapter = new ContactListAdapter();
 
+    private OnContactListInteractionListener listener;
+
     public ContactListFragment() {
         // Required empty public constructor
     }
@@ -85,8 +87,6 @@ public class ContactListFragment extends Fragment {
                     }
                 });
     }
-
-    private OnContactListInteractionListener listener;
 
     @Override
     public void onAttach(Context context) {

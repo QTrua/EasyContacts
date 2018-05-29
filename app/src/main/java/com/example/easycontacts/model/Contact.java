@@ -37,6 +37,8 @@ public class Contact {
     @Json(name = "organization")
     public String organization;
 
+    public Contact() {}
+
     public Contact(String UUID, String firstName, String lastName, List<Email> emails, List<Address> addresses, List<Phone> phones, String note, String organization) {
         this.UUID = UUID;
         this.firstName = firstName;
