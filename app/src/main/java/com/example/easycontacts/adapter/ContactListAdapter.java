@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.easycontacts.R;
-import com.example.easycontacts.model.Contact;
+import com.example.easycontacts.model.db.Contact;
 
 import java.util.List;
 

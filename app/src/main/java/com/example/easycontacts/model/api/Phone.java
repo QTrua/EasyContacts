@@ -1,4 +1,4 @@
-package com.example.easycontacts.model;
+package com.example.easycontacts.model.api;
 
 import com.squareup.moshi.Json;
 

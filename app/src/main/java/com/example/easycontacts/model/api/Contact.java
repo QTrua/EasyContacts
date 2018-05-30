@@ -1,4 +1,4 @@
-package com.example.easycontacts.model;
+package com.example.easycontacts.model.api;
 
 import android.text.TextUtils;
 
@@ -6,16 +6,14 @@ import com.squareup.moshi.Json;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 /**
  * Created by xkrej63 on 29.05.2018.
  */
 
-public class Contact implements Serializable {
+public class Contact {
     @Json(name = "uuid")
     public String UUID;
 
@@ -51,6 +49,31 @@ public class Contact implements Serializable {
         this.phones = phones;
         this.note = note;
         this.organization = organization;
+    }
+
+    public static Contact fromDbContact(com.example.easycontacts.model.db.Contact dbContact) {
+        Contact contact = new Contact();
+
+        contact.setUUID(dbContact.getUUID());
+        contact.setFirstName(dbContact.getFirstName());
+        contact.setLastName(dbContact.getLastName());
+
+        if (!TextUtils.isEmpty(dbContact.getPhone())) {
+            Phone phone = new Phone("personal", dbContact.getPhone());
+            contact.setPhones(Collections.singletonList(phone));
+        }
+
+        if (!TextUtils.isEmpty(dbContact.getEmail())) {
+            Email email = new Email("personal", dbContact.getEmail());
+            contact.setEmails(Collections.singletonList(email));
+        }
+
+        if (!TextUtils.isEmpty(dbContact.getAddress())) {
+            Address address = new Address("home", dbContact.getAddress());
+            contact.setAddresses(Collections.singletonList(address));
+        }
+
+        return contact;
     }
 
     public String getUUID() {
@@ -115,55 +138,5 @@ public class Contact implements Serializable {
 
     public void setOrganization(String organization) {
         this.organization = organization;
-    }
-
-    public String getDisplayName() {
-        List<String> parts = new ArrayList<>();
-
-        if (!TextUtils.isEmpty(getFirstName())) {
-            parts.add(getFirstName());
-        }
-
-        if (!TextUtils.isEmpty(getLastName())) {
-            parts.add(getLastName());
-        }
-
-        return TextUtils.join(" ", parts);
-    }
-
-    public String getPrimaryContactInfo() {
-        if (getPhones() != null && getPhones().size() != 0) {
-            return getPhones().get(0).getPhone();
-        }
-
-        if (getEmails() != null && getEmails().size() != 0) {
-            return getEmails().get(0).getEmail();
-        }
-
-        if (getAddresses() != null && getAddresses().size() != 0) {
-            return getAddresses().get(0).getAddress();
-        }
-
-        return null;
-    }
-
-    public void update(String firstName, String lastName, String phoneNumber, String emailAddress, String addressString) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-
-        if (!TextUtils.isEmpty(phoneNumber)) {
-            Phone phone = new Phone("personal", phoneNumber);
-            phones = Collections.singletonList(phone);
-        }
-
-        if (!TextUtils.isEmpty(emailAddress)) {
-            Email email = new Email("personal", emailAddress);
-            emails = Collections.singletonList(email);
-        }
-
-        if (!TextUtils.isEmpty(addressString)) {
-            Address address = new Address("home", addressString);
-            addresses = Collections.singletonList(address);
-        }
     }
 }

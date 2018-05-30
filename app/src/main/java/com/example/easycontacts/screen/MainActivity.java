@@ -2,12 +2,11 @@ package com.example.easycontacts.screen;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.example.easycontacts.R;
-import com.example.easycontacts.model.Contact;
+import com.example.easycontacts.model.db.Contact;
 
 public class MainActivity extends AppCompatActivity
     implements ContactListFragment.OnContactListInteractionListener,

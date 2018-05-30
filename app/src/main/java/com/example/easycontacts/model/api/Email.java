@@ -1,9 +1,12 @@
-package com.example.easycontacts.model;
+package com.example.easycontacts.model.api;
+
+import android.arch.persistence.room.Entity;
 
 /**
  * Created by xkrej63 on 29.05.2018.
  */
 
+@Entity
 public class Email {
     public String type;
     public String email;

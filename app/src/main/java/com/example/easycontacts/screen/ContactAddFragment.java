@@ -4,19 +4,18 @@ package com.example.easycontacts.screen;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,15 +27,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.easycontacts.R;
-import com.example.easycontacts.model.Address;
-import com.example.easycontacts.model.Contact;
-import com.example.easycontacts.model.Email;
-import com.example.easycontacts.model.Phone;
+import com.example.easycontacts.model.db.Contact;
 import com.example.easycontacts.network.NetworkManager;
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
-
-import java.util.Arrays;
+import com.example.easycontacts.repository.ContactRepository;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -47,7 +40,7 @@ import retrofit2.Response;
  */
 public class ContactAddFragment extends Fragment {
 
-    private NetworkManager networkManager;
+    private ContactRepository contactRepository;
 
     private static final String KEY_CONTACT = "contact";
 
@@ -75,6 +68,8 @@ public class ContactAddFragment extends Fragment {
         }
 
         setHasOptionsMenu(contact != null);
+
+        contactRepository = new ContactRepository(getContext());
     }
 
     @Override
@@ -105,28 +100,25 @@ public class ContactAddFragment extends Fragment {
 
             textInputFirstName.setText(contact.getFirstName());
             textInputLastName.setText(contact.getLastName());
-            if (contact.getPhones() != null && contact.getPhones().size() != 0) {
-                textInputPhone.setText(contact.getPhones().get(0).getPhone());
-            }
-
-            if (contact.getEmails() != null && contact.getEmails().size() != 0) {
-                textInputEmail.setText(contact.getEmails().get(0).getEmail());
-            }
-
-            if (contact.getAddresses() != null && contact.getAddresses().size() != 0) {
-                textInputAddress.setText(contact.getAddresses().get(0).getAddress());
-            }
+            textInputPhone.setText(contact.getPhone());
+            textInputEmail.setText(contact.getEmail());
+            textInputAddress.setText(contact.getAddress());
         }
 
-        SharedPreferences preferences = getContext().
-                getSharedPreferences(MainActivity.SHARED_PREF_KEY, Context.MODE_PRIVATE);
-        String userId = preferences.getString(MainActivity.KEY_USER_ID, null);
-        networkManager = new NetworkManager(userId);
+        if (!isNetworkAvailable()) {
+            sendButton.setEnabled(false);
+        }
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.contact_edit, menu);
+        if (!isNetworkAvailable()) {
+            MenuItem item = menu.findItem(R.id.itemDelete);
+            item.setEnabled(false);
+            item.getIcon()
+                    .setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN);
+        }
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -178,32 +170,15 @@ public class ContactAddFragment extends Fragment {
         }
         newContact.update(firstName, lastName, phoneNumber, emailAddress, addressString);
 
-        saveContact(newContact);
-    }
-
-    private void saveContact(Contact newContact) {
-        Call<Contact> call;
-        if (newContact.getUUID() == null) {
-            call = networkManager.getContactService()
-                    .createContact(newContact);
-        } else {
-            call = networkManager.getContactService()
-                    .updateContact(newContact.getUUID(), newContact);
-        }
-
-        call.enqueue(new Callback<Contact>() {
+        contactRepository.saveContact(newContact, new ContactRepository.SaveCallback() {
             @Override
-            public void onResponse(@NonNull Call<Contact> call, @NonNull Response<Contact> response) {
-                if (response.isSuccessful()) {
-                    getActivity().onBackPressed();
-                } else {
-                    Toast.makeText(getContext(), "Request not successful", Toast.LENGTH_LONG).show();
-                }
+            public void onSuccess() {
+                getActivity().onBackPressed();
             }
 
             @Override
-            public void onFailure(@NonNull Call<Contact> call, @NonNull Throwable t) {
-                Log.e(getClass().getSimpleName(), t.toString());
+            public void onError(Throwable t) {
+                Toast.makeText(getContext(), "Request not successful", Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -254,27 +229,26 @@ public class ContactAddFragment extends Fragment {
     }
 
     private void doDeleteItem() {
-
         if (contact == null) {
             return;
         }
 
-        networkManager.getContactService()
-                .deleteContact(contact.getUUID())
-                .enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                        if (response.isSuccessful()) {
-                            getActivity().onBackPressed();
-                        } else {
-                            Toast.makeText(getContext(), "Request not successful", Toast.LENGTH_LONG).show();
-                        }
-                    }
+        contactRepository.deleteContact(contact.getUUID(), new ContactRepository.SaveCallback() {
+            @Override
+            public void onSuccess() {
+                getActivity().onBackPressed();
+            }
 
-                    @Override
-                    public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                        Log.e(getClass().getSimpleName(), t.toString());
-                    }
-                });
+            @Override
+            public void onError(Throwable t) {
+                Toast.makeText(getContext(), "Request not successful", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

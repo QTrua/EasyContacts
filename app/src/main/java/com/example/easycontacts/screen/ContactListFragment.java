@@ -2,30 +2,22 @@ package com.example.easycontacts.screen;
 
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.easycontacts.R;
 import com.example.easycontacts.adapter.ContactListAdapter;
-import com.example.easycontacts.example.Contacts;
-import com.example.easycontacts.model.Contact;
-import com.example.easycontacts.network.NetworkManager;
+import com.example.easycontacts.model.db.Contact;
+import com.example.easycontacts.repository.ContactRepository;
 
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 
 /**
@@ -33,7 +25,7 @@ import retrofit2.Response;
  */
 public class ContactListFragment extends Fragment {
 
-    private NetworkManager networkManager;
+    private ContactRepository contactRepository;
 
     private ContactListAdapter contactListAdapter = new ContactListAdapter();
 
@@ -45,7 +37,14 @@ public class ContactListFragment extends Fragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        contactRepository = new ContactRepository(getContext());
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_contact_list, container, false);
@@ -76,31 +75,14 @@ public class ContactListFragment extends Fragment {
             }
         });
 
-        SharedPreferences preferences = getContext().
-                getSharedPreferences(MainActivity.SHARED_PREF_KEY, Context.MODE_PRIVATE);
-        String userId = preferences.getString(MainActivity.KEY_USER_ID, null);
-        networkManager = new NetworkManager(userId);
-
-        loadContacts();
+        contactRepository.listContacts(new ContactRepository.ContactCallback() {
+            @Override
+            public void withContacts(List<Contact> contacts) {
+                contactListAdapter.setContacts(contacts);
+            }
+        });
     }
 
-    private void loadContacts() {
-
-        networkManager.getContactService()
-                .listContacts()
-                .enqueue(new Callback<List<Contact>>() {
-                    @Override
-                    public void onResponse(Call<List<Contact>> call, Response<List<Contact>> response) {
-                        List<Contact> contacts = response.body();
-                        contactListAdapter.setContacts(contacts);
-                    }
-
-                    @Override
-                    public void onFailure(Call<List<Contact>> call, Throwable t) {
-                        Log.e(getClass().getSimpleName(), t.toString());
-                    }
-                });
-    }
 
     @Override
     public void onAttach(Context context) {

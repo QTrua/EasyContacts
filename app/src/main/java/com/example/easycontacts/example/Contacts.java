@@ -1,12 +1,11 @@
 package com.example.easycontacts.example;
 
-import com.example.easycontacts.model.Address;
-import com.example.easycontacts.model.Contact;
-import com.example.easycontacts.model.Email;
-import com.example.easycontacts.model.Phone;
+import com.example.easycontacts.model.api.Address;
+import com.example.easycontacts.model.api.Contact;
+import com.example.easycontacts.model.api.Email;
+import com.example.easycontacts.model.api.Phone;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
