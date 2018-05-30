@@ -55,6 +55,14 @@ public class ContactListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         RecyclerView contactListView = view.findViewById(R.id.listContacts);
+        contactListAdapter.listener = new ContactListAdapter.OnContactItemInteracted() {
+            @Override
+            public void onContactClicked(Contact contact) {
+                if (listener != null) {
+                    listener.onEditContact(contact);
+                }
+            }
+        };
         contactListView.setAdapter(contactListAdapter);
 
         FloatingActionButton fab = view.findViewById(R.id.fabAddContact);
@@ -109,5 +117,6 @@ public class ContactListFragment extends Fragment {
 
     public interface OnContactListInteractionListener {
         void onCreateContact();
+        void onEditContact(Contact contact);
     }
 }

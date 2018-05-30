@@ -20,6 +20,8 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
 
     private List<Contact> contacts;
 
+    public OnContactItemInteracted listener;
+
     public void setContacts(List<Contact> contacts) {
         this.contacts = contacts;
         notifyDataSetChanged();
@@ -50,12 +52,25 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
             super(itemView);
         }
 
-        void onBind(Contact contact) {
+        void onBind(final Contact contact) {
             TextView textTitleView = itemView.findViewById(R.id.textTitleView);
             TextView textSubtitleView = itemView.findViewById(R.id.textSubtitleView);
 
             textTitleView.setText(contact.getDisplayName());
             textSubtitleView.setText(contact.getPrimaryContactInfo());
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (listener != null) {
+                        listener.onContactClicked(contact);
+                    }
+                }
+            });
         }
+    }
+
+    public interface OnContactItemInteracted {
+        void onContactClicked(Contact contact);
     }
 }

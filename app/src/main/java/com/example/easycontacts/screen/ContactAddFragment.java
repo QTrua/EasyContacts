@@ -40,10 +40,31 @@ public class ContactAddFragment extends Fragment {
 
     private NetworkManager networkManager = new NetworkManager();
 
+    private static final String KEY_CONTACT = "contact";
+
+    private Contact contact;
+
     public ContactAddFragment() {
         // Required empty public constructor
     }
 
+    public static ContactAddFragment newInstance(Contact contact) {
+        ContactAddFragment fragment = new ContactAddFragment();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(KEY_CONTACT, contact);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            contact = (Contact) bundle.getSerializable(KEY_CONTACT);
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -63,11 +84,38 @@ public class ContactAddFragment extends Fragment {
                 send(v);
             }
         });
+
+        if (contact != null) {
+            EditText textInputFirstName = view.<TextInputLayout>findViewById(R.id.textLayoutFirstName).getEditText();
+            EditText textInputLastName = view.<TextInputLayout>findViewById(R.id.textLayoutLastName).getEditText();
+            EditText textInputPhone = view.<TextInputLayout>findViewById(R.id.textLayoutPhone).getEditText();
+            EditText textInputEmail = view.<TextInputLayout>findViewById(R.id.textLayoutEmail).getEditText();
+            EditText textInputAddress = view.<TextInputLayout>findViewById(R.id.textLayoutAddress).getEditText();
+
+            textInputFirstName.setText(contact.getFirstName());
+            textInputLastName.setText(contact.getLastName());
+            if (contact.getPhones() != null && contact.getPhones().size() != 0) {
+                textInputPhone.setText(contact.getPhones().get(0).getPhone());
+            }
+
+            if (contact.getEmails() != null && contact.getEmails().size() != 0) {
+                textInputEmail.setText(contact.getEmails().get(0).getEmail());
+            }
+
+            if (contact.getAddresses() != null && contact.getAddresses().size() != 0) {
+                textInputAddress.setText(contact.getAddresses().get(0).getAddress());
+            }
+        }
+
     }
 
     private void send(View interactedView) {
         View view = getView();
         if (view == null) {
+            return;
+        }
+
+        if (!validateInputs(view)) {
             return;
         }
 
@@ -82,82 +130,75 @@ public class ContactAddFragment extends Fragment {
         EditText textInputAddress = view.<TextInputLayout>findViewById(R.id.textLayoutAddress).getEditText();
 
         String firstName = textInputFirstName.getText().toString();
-        if (TextUtils.isEmpty(firstName)) {
-            textLayoutFirstName.setError("First name is required");
-
-            textInputFirstName.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    if (s.length() > 0) {
-                        textLayoutFirstName.setErrorEnabled(false);
-                    }
-                }
-            });
-            return;
-        } else {
-            textLayoutFirstName.setErrorEnabled(false);
-        }
-
         String lastName = textInputLastName.getText().toString();
-        if (TextUtils.isEmpty(lastName)) {
-            textLayoutLastName.setError("Last name is required");
-            return;
-        } else {
-            textLayoutLastName.setErrorEnabled(false);
-        }
-
-        Contact contact = new Contact();
-        contact.setFirstName(firstName);
-        contact.setLastName(lastName);
-
         String phoneNumber = textInputPhone.getText().toString();
-        if (!TextUtils.isEmpty(phoneNumber)) {
-            Phone phone = new Phone("personal", phoneNumber);
-            contact.setPhones(Arrays.asList(phone));
-        }
-
         String emailAddress = textInputEmail.getText().toString();
-        if (!TextUtils.isEmpty(emailAddress)) {
-            Email email = new Email("personal", emailAddress);
-            contact.setEmails(Arrays.asList(email));
-        }
-
         String addressString = textInputAddress.getText().toString();
-        if (!TextUtils.isEmpty(addressString)) {
-            Address address = new Address("home", addressString);
-            contact.setAddresses(Arrays.asList(address));
-        }
 
         Button sendButton = (Button)interactedView;
         sendButton.setEnabled(false);
 
-        networkManager.getContactService()
-                .createContact(contact)
-                .enqueue(new Callback<Contact>() {
-                    @Override
-                    public void onResponse(Call<Contact> call, Response<Contact> response) {
-                        if (response.isSuccessful()) {
-                            getActivity().onBackPressed();
-                        } else {
-                            Toast.makeText(getContext(), "Request not successful", Toast.LENGTH_LONG).show();;
-                        }
-                    }
+        Contact newContact;
+        if (contact != null) {
+            newContact = contact;
+        } else {
+            newContact = new Contact();
+        }
+        newContact.update(firstName, lastName, phoneNumber, emailAddress, addressString);
 
-                    @Override
-                    public void onFailure(Call<Contact> call, Throwable t) {
-                        Log.e(getClass().getSimpleName(), t.toString());
-                    }
-                });
+        saveContact(newContact);
+    }
+
+    private void saveContact(Contact newContact) {
+        Call<Contact> call;
+        if (newContact.getUUID() == null) {
+            call = networkManager.getContactService()
+                    .createContact(newContact);
+        } else {
+            call = networkManager.getContactService()
+                    .updateContact(newContact.getUUID(), newContact);
+        }
+
+        call.enqueue(new Callback<Contact>() {
+            @Override
+            public void onResponse(Call<Contact> call, Response<Contact> response) {
+                if (response.isSuccessful()) {
+                    getActivity().onBackPressed();
+                } else {
+                    Toast.makeText(getContext(), "Request not successful", Toast.LENGTH_LONG).show();
+                    ;
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Contact> call, Throwable t) {
+                Log.e(getClass().getSimpleName(), t.toString());
+            }
+        });
+    }
+
+    private boolean validateInputs(View view) {
+        final TextInputLayout textLayoutFirstName = view.findViewById(R.id.textLayoutFirstName);
+        EditText textInputFirstName = textLayoutFirstName.getEditText();
+
+        TextInputLayout textLayoutLastName = view.findViewById(R.id.textLayoutLastName);
+        EditText textInputLastName = textLayoutLastName.getEditText();
+
+        if (TextUtils.isEmpty(textInputFirstName.getText().toString())) {
+            textLayoutFirstName.setError("First name is required");
+            return false;
+        } else {
+            textLayoutFirstName.setErrorEnabled(false);
+        }
+
+        if (TextUtils.isEmpty(textInputLastName.getText().toString())) {
+            textLayoutLastName.setError("Last name is required");
+            return false;
+        } else {
+            textLayoutLastName.setErrorEnabled(false);
+        }
+
+        return true;
     }
 
 

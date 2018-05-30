@@ -4,7 +4,10 @@ import android.text.TextUtils;
 
 import com.squareup.moshi.Json;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -12,7 +15,7 @@ import java.util.List;
  * Created by xkrej63 on 29.05.2018.
  */
 
-public class Contact {
+public class Contact implements Serializable {
     @Json(name = "uuid")
     public String UUID;
 
@@ -142,5 +145,25 @@ public class Contact {
         }
 
         return null;
+    }
+
+    public void update(String firstName, String lastName, String phoneNumber, String emailAddress, String addressString) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+
+        if (!TextUtils.isEmpty(phoneNumber)) {
+            Phone phone = new Phone("personal", phoneNumber);
+            phones = Collections.singletonList(phone);
+        }
+
+        if (!TextUtils.isEmpty(emailAddress)) {
+            Email email = new Email("personal", emailAddress);
+            emails = Collections.singletonList(email);
+        }
+
+        if (!TextUtils.isEmpty(addressString)) {
+            Address address = new Address("home", addressString);
+            addresses = Collections.singletonList(address);
+        }
     }
 }
