@@ -5,7 +5,9 @@ import com.example.easycontacts.model.Contact;
 import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
@@ -25,4 +27,7 @@ public interface ContactService {
 
     @PATCH("contact/{contact_id}")
     Call<Contact> updateContact(@Path("contact_id") String contactId, @Body Contact contact);
+
+    @DELETE("contact/{contact_id}")
+    Call<Void> deleteContact(@Path("contact_id") String contactId);
 }

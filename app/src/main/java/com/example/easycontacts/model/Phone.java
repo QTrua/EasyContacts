@@ -1,11 +1,15 @@
 package com.example.easycontacts.model;
 
+import com.squareup.moshi.Json;
+
 /**
  * Created by xkrej63 on 29.05.2018.
  */
 
 public class Phone {
     public String type;
+
+    @Json(name = "phone_number")
     public String phone;
 
     public Phone(String type, String address) {

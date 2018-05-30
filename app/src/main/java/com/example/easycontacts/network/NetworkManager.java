@@ -15,7 +15,7 @@ public class NetworkManager {
 
     private ContactService contactService;
 
-    public NetworkManager() {
+    public NetworkManager(String userId) {
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
@@ -23,8 +23,9 @@ public class NetworkManager {
                 .addInterceptor(loggingInterceptor)
                 .build();
 
+        String baseUrl = "https://contactee.jankrecek.cz/" + userId + "/";
         retrofit = new Retrofit.Builder()
-                .baseUrl("https://contactee.jankrecek.cz/test@example.com/")
+                .baseUrl(baseUrl)
                 .client(okHttpClient)
                 .addConverterFactory(MoshiConverterFactory.create())
                 .build();

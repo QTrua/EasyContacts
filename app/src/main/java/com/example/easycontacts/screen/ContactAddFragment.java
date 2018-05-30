@@ -1,17 +1,26 @@
 package com.example.easycontacts.screen;
 
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -38,7 +47,7 @@ import retrofit2.Response;
  */
 public class ContactAddFragment extends Fragment {
 
-    private NetworkManager networkManager = new NetworkManager();
+    private NetworkManager networkManager;
 
     private static final String KEY_CONTACT = "contact";
 
@@ -64,10 +73,12 @@ public class ContactAddFragment extends Fragment {
         if (bundle != null) {
             contact = (Contact) bundle.getSerializable(KEY_CONTACT);
         }
+
+        setHasOptionsMenu(contact != null);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_contact_add, container, false);
@@ -107,6 +118,27 @@ public class ContactAddFragment extends Fragment {
             }
         }
 
+        SharedPreferences preferences = getContext().
+                getSharedPreferences(MainActivity.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        String userId = preferences.getString(MainActivity.KEY_USER_ID, null);
+        networkManager = new NetworkManager(userId);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.contact_edit, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.itemDelete:
+                onDeleteItem();
+                return true;
+        }
+
+        return false;
     }
 
     private void send(View interactedView) {
@@ -161,17 +193,16 @@ public class ContactAddFragment extends Fragment {
 
         call.enqueue(new Callback<Contact>() {
             @Override
-            public void onResponse(Call<Contact> call, Response<Contact> response) {
+            public void onResponse(@NonNull Call<Contact> call, @NonNull Response<Contact> response) {
                 if (response.isSuccessful()) {
                     getActivity().onBackPressed();
                 } else {
                     Toast.makeText(getContext(), "Request not successful", Toast.LENGTH_LONG).show();
-                    ;
                 }
             }
 
             @Override
-            public void onFailure(Call<Contact> call, Throwable t) {
+            public void onFailure(@NonNull Call<Contact> call, @NonNull Throwable t) {
                 Log.e(getClass().getSimpleName(), t.toString());
             }
         });
@@ -201,5 +232,49 @@ public class ContactAddFragment extends Fragment {
         return true;
     }
 
+    private void onDeleteItem() {
+        AlertDialog alertDialog = new AlertDialog.Builder(getContext())
+                .setTitle(R.string.delete_confirmation)
+                .setMessage(R.string.delete_confirmation_description)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        doDeleteItem();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .create();
 
+        alertDialog.show();
+    }
+
+    private void doDeleteItem() {
+
+        if (contact == null) {
+            return;
+        }
+
+        networkManager.getContactService()
+                .deleteContact(contact.getUUID())
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            getActivity().onBackPressed();
+                        } else {
+                            Toast.makeText(getContext(), "Request not successful", Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                        Log.e(getClass().getSimpleName(), t.toString());
+                    }
+                });
+    }
 }

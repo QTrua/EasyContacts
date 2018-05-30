@@ -2,6 +2,7 @@ package com.example.easycontacts.screen;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -32,7 +33,7 @@ import retrofit2.Response;
  */
 public class ContactListFragment extends Fragment {
 
-    private NetworkManager networkManager = new NetworkManager();
+    private NetworkManager networkManager;
 
     private ContactListAdapter contactListAdapter = new ContactListAdapter();
 
@@ -74,6 +75,11 @@ public class ContactListFragment extends Fragment {
                 }
             }
         });
+
+        SharedPreferences preferences = getContext().
+                getSharedPreferences(MainActivity.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        String userId = preferences.getString(MainActivity.KEY_USER_ID, null);
+        networkManager = new NetworkManager(userId);
 
         loadContacts();
     }

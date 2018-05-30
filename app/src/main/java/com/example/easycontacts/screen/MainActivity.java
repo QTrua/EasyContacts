@@ -1,5 +1,8 @@
 package com.example.easycontacts.screen;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -7,14 +10,31 @@ import com.example.easycontacts.R;
 import com.example.easycontacts.model.Contact;
 
 public class MainActivity extends AppCompatActivity
-    implements ContactListFragment.OnContactListInteractionListener {
+    implements ContactListFragment.OnContactListInteractionListener,
+    LoginFragment.OnLoginInteractionListener {
+
+    public static final String SHARED_PREF_KEY = "credentials";
+    public static final String KEY_USER_ID = "user_id";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        setUpListFragment();
+        SharedPreferences preferences = getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        String userId = preferences.getString(KEY_USER_ID, null);
+        if (userId == null) {
+            setUpLoginFragment();
+        } else {
+            setUpListFragment();
+        }
+    }
+
+    private void setUpLoginFragment() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frameContainer, new LoginFragment())
+                .commit();
     }
 
     private void setUpListFragment() {
@@ -40,5 +60,10 @@ public class MainActivity extends AppCompatActivity
                 .replace(R.id.frameContainer, ContactAddFragment.newInstance(contact))
                 .addToBackStack(null)
                 .commit();
+    }
+
+    @Override
+    public void onLoggedIn() {
+        setUpListFragment();
     }
 }
