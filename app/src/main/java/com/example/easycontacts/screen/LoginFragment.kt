@@ -14,6 +14,8 @@ import android.widget.Button
 import android.widget.EditText
 
 import com.example.easycontacts.R
+import com.example.easycontacts.extension.getDefaultSharedPreferences
+import kotlinx.android.synthetic.main.fragment_login.*
 
 /**
  * A simple [Fragment] subclass.
@@ -32,30 +34,25 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val button = view.findViewById<Button>(R.id.buttonLogin)
-        button.setOnClickListener { onLogin() }
+        buttonLogin.setOnClickListener { onLogin() }
     }
 
     private fun onLogin() {
-        val view = view ?: return
+        if (view == null) {
+            return
+        }
 
-        val textInputLayoutUserId = view.findViewById<TextInputLayout>(R.id.textLayoutUserID)
-        val textInputEditTextUserId = view.findViewById<TextInputEditText>(R.id.textInputUserID)
-
-        val userId = textInputEditTextUserId.text.toString()
+        val userId = textInputUserID.text.toString()
         saveUserId(userId)
 
-        if (listener != null) {
-            listener!!.onLoggedIn()
-        }
+        listener?.onLoggedIn()
     }
 
     private fun saveUserId(userId: String) {
-        val preferences = context!!.getSharedPreferences(MainActivity.SHARED_PREF_KEY, Context.MODE_PRIVATE)
-
-        preferences.edit()
-                .putString(MainActivity.KEY_USER_ID, userId)
-                .commit()
+        context?.getDefaultSharedPreferences()
+                ?.edit()
+                ?.putString(MainActivity.KEY_USER_ID, userId)
+                ?.commit()
     }
 
     override fun onAttach(context: Context?) {

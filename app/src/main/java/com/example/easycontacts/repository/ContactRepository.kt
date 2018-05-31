@@ -10,6 +10,8 @@ import android.text.TextUtils
 import android.util.Log
 
 import com.example.easycontacts.database.AppDatabase
+import com.example.easycontacts.extension.getDefaultSharedPreferences
+import com.example.easycontacts.extension.getStringByColumnIndex
 import com.example.easycontacts.model.db.Contact
 import com.example.easycontacts.network.NetworkManager
 import com.example.easycontacts.screen.MainActivity
@@ -33,7 +35,7 @@ class ContactRepository(context: Context) {
     private val contentResolver: ContentResolver
 
     init {
-        val preferences = context.getSharedPreferences(MainActivity.SHARED_PREF_KEY, Context.MODE_PRIVATE)
+        val preferences = context.getDefaultSharedPreferences()
         val userId = preferences.getString(MainActivity.KEY_USER_ID, null)
         networkManager = NetworkManager(userId!!)
 
@@ -73,10 +75,8 @@ class ContactRepository(context: Context) {
         val contacts = ArrayList<Contact>()
         if (cursor!!.count > 0) {
             while (cursor.moveToNext()) {
-                val id = cursor.getString(
-                        cursor.getColumnIndex(ContactsContract.Contacts._ID))
-                val name = cursor.getString(
-                        cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME))
+                val id = cursor.getStringByColumnIndex(ContactsContract.Contacts._ID)
+                val name = cursor.getStringByColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
 
                 val contact = Contact()
 
@@ -89,10 +89,9 @@ class ContactRepository(context: Context) {
                         arrayOf(id), null
                 )
 
-                if (phoneCursor!!.moveToNext()) {
-                    val phoneNumber = phoneCursor.getString(
-                            phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                    contact.phone = phoneNumber
+                if (phoneCursor?.moveToNext() == true) {
+                    contact.phone = phoneCursor
+                            .getStringByColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
                 }
 
                 phoneCursor.close()
@@ -103,11 +102,9 @@ class ContactRepository(context: Context) {
                         arrayOf(id), null
                 )
 
-                if (emailCursor!!.moveToNext()) {
-                    val email = emailCursor.getString(
-                            emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS)
-                    )
-                    contact.email = email
+                if (emailCursor?.moveToNext() == true) {
+                    contact.email = emailCursor
+                            .getStringByColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS)
                 }
                 emailCursor.close()
 
@@ -117,11 +114,10 @@ class ContactRepository(context: Context) {
                         arrayOf(id), null
                 )
 
-                if (addressCursor!!.moveToNext()) {
-                    val address = addressCursor.getString(
-                            addressCursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS)
-                    )
-                    contact.address = address
+                if (addressCursor?.moveToNext() == true) {
+                    contact.address = addressCursor
+                            .getStringByColumnIndex(
+                                    ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS)
                 }
 
                 addressCursor.close()

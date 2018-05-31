@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.Log
 
 import com.example.easycontacts.R
+import com.example.easycontacts.extension.getDefaultSharedPreferences
 import com.example.easycontacts.model.db.Contact
 
 class MainActivity : AppCompatActivity(), ContactListFragment.OnContactListInteractionListener, LoginFragment.OnLoginInteractionListener {
@@ -16,7 +17,7 @@ class MainActivity : AppCompatActivity(), ContactListFragment.OnContactListInter
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val preferences = getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE)
+        val preferences = getDefaultSharedPreferences()
         val userId = preferences.getString(KEY_USER_ID, null)
         if (userId == null) {
             setUpLoginFragment()
@@ -60,7 +61,7 @@ class MainActivity : AppCompatActivity(), ContactListFragment.OnContactListInter
     }
 
     companion object {
-        const val SHARED_PREF_KEY = "credentials"
+
         const val KEY_USER_ID = "user_id"
     }
 }

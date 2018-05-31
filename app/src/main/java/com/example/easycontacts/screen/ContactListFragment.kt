@@ -22,6 +22,7 @@ import com.example.easycontacts.R
 import com.example.easycontacts.adapter.ContactListAdapter
 import com.example.easycontacts.model.db.Contact
 import com.example.easycontacts.repository.ContactRepository
+import kotlinx.android.synthetic.main.fragment_contact_list.*
 
 
 /**
@@ -52,21 +53,14 @@ class ContactListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val contactListView = view.findViewById<RecyclerView>(R.id.listContacts)
-        contactListAdapter.listener = object : ContactListAdapter.OnContactItemInteracted {
-            override fun onContactClicked(contact: Contact) {
-                if (listener != null) {
-                    listener!!.onEditContact(contact)
-                }
-            }
+        contactListAdapter.listener = {
+            listener?.onEditContact(it)
         }
-        contactListView.adapter = contactListAdapter
 
-        val fab = view.findViewById<FloatingActionButton>(R.id.fabAddContact)
-        fab.setOnClickListener {
-            if (listener != null) {
-                listener!!.onCreateContact()
-            }
+        listContacts.adapter = contactListAdapter
+
+        fabAddContact?.setOnClickListener {
+            listener?.onCreateContact()
         }
 
         requestAndLoadContacts()
@@ -120,7 +114,7 @@ class ContactListFragment : Fragment() {
     private fun doLoadContacts() {
         contactRepository!!.listLocalContacts(object : ContactRepository.ContactCallback {
             override fun withContacts(contacts: List<Contact>) {
-                contactListAdapter.setContacts(contacts)
+                contactListAdapter.contacts = contacts
             }
         })
     }

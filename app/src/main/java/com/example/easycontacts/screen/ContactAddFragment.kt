@@ -28,6 +28,7 @@ import com.example.easycontacts.R
 import com.example.easycontacts.model.db.Contact
 import com.example.easycontacts.network.NetworkManager
 import com.example.easycontacts.repository.ContactRepository
+import kotlinx.android.synthetic.main.fragment_contact_add.*
 
 import retrofit2.Call
 import retrofit2.Callback
@@ -71,25 +72,18 @@ class ContactAddFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val sendButton = view.findViewById<Button>(R.id.buttonSend)
-        sendButton.setOnClickListener { v -> send(v) }
+        buttonSend.setOnClickListener { send() }
 
         if (contact != null) {
-            val textInputFirstName = view.findViewById<TextInputLayout>(R.id.textLayoutFirstName).editText
-            val textInputLastName = view.findViewById<TextInputLayout>(R.id.textLayoutLastName).editText
-            val textInputPhone = view.findViewById<TextInputLayout>(R.id.textLayoutPhone).editText
-            val textInputEmail = view.findViewById<TextInputLayout>(R.id.textLayoutEmail).editText
-            val textInputAddress = view.findViewById<TextInputLayout>(R.id.textLayoutAddress).editText
-
-            textInputFirstName!!.setText(contact!!.firstName)
-            textInputLastName!!.setText(contact!!.lastName)
-            textInputPhone!!.setText(contact!!.phone)
-            textInputEmail!!.setText(contact!!.email)
-            textInputAddress!!.setText(contact!!.address)
+            textLayoutFirstName.editText?.setText(contact!!.firstName)
+            textLayoutLastName.editText?.setText(contact!!.lastName)
+            textLayoutPhone.editText?.setText(contact!!.phone)
+            textLayoutEmail.editText?.setText(contact!!.email)
+            textLayoutAddress.editText?.setText(contact!!.address)
         }
 
         if (!isNetworkAvailable) {
-            sendButton.isEnabled = false
+            buttonSend.isEnabled = false
         }
     }
 
@@ -115,31 +109,20 @@ class ContactAddFragment : Fragment() {
         return false
     }
 
-    private fun send(interactedView: View) {
+    private fun send() {
         val view = view ?: return
 
-        if (!validateInputs(view)) {
+        if (!validateInputs()) {
             return
         }
 
-        val textLayoutFirstName = view.findViewById<TextInputLayout>(R.id.textLayoutFirstName)
-        val textInputFirstName = textLayoutFirstName.editText
+        val firstName = textLayoutFirstName.editText?.text.toString()
+        val lastName = textLayoutLastName.editText?.text.toString()
+        val phoneNumber = textLayoutPhone.editText?.text.toString()
+        val emailAddress = textLayoutEmail.editText?.text.toString()
+        val addressString = textLayoutAddress.editText?.text.toString()
 
-        val textLayoutLastName = view.findViewById<TextInputLayout>(R.id.textLayoutLastName)
-        val textInputLastName = textLayoutLastName.editText
-
-        val textInputPhone = view.findViewById<TextInputLayout>(R.id.textLayoutPhone).editText
-        val textInputEmail = view.findViewById<TextInputLayout>(R.id.textLayoutEmail).editText
-        val textInputAddress = view.findViewById<TextInputLayout>(R.id.textLayoutAddress).editText
-
-        val firstName = textInputFirstName!!.text.toString()
-        val lastName = textInputLastName!!.text.toString()
-        val phoneNumber = textInputPhone!!.text.toString()
-        val emailAddress = textInputEmail!!.text.toString()
-        val addressString = textInputAddress!!.text.toString()
-
-        val sendButton = interactedView as Button
-        sendButton.isEnabled = false
+        buttonSend.isEnabled = false
 
         val newContact = contact?.let { it } ?: Contact()
         newContact.update(firstName, lastName, phoneNumber, emailAddress, addressString)
@@ -155,21 +138,15 @@ class ContactAddFragment : Fragment() {
         })
     }
 
-    private fun validateInputs(view: View): Boolean {
-        val textLayoutFirstName = view.findViewById<TextInputLayout>(R.id.textLayoutFirstName)
-        val textInputFirstName = textLayoutFirstName.editText
-
-        val textLayoutLastName = view.findViewById<TextInputLayout>(R.id.textLayoutLastName)
-        val textInputLastName = textLayoutLastName.editText
-
-        if (TextUtils.isEmpty(textInputFirstName!!.text.toString())) {
+    private fun validateInputs(): Boolean {
+        if (TextUtils.isEmpty(textLayoutFirstName.editText?.text.toString())) {
             textLayoutFirstName.error = "First name is required"
             return false
         } else {
             textLayoutFirstName.isErrorEnabled = false
         }
 
-        if (TextUtils.isEmpty(textInputLastName!!.text.toString())) {
+        if (TextUtils.isEmpty(textLayoutLastName.editText?.text.toString())) {
             textLayoutLastName.error = "Last name is required"
             return false
         } else {
@@ -183,8 +160,8 @@ class ContactAddFragment : Fragment() {
         val alertDialog = AlertDialog.Builder(context!!)
                 .setTitle(R.string.delete_confirmation)
                 .setMessage(R.string.delete_confirmation_description)
-                .setPositiveButton(android.R.string.ok) { dialog, which -> doDeleteItem() }
-                .setNegativeButton(android.R.string.cancel) { dialog, which -> dialog.dismiss() }
+                .setPositiveButton(android.R.string.ok) { _, _ -> doDeleteItem() }
+                .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
                 .create()
 
         alertDialog.show()

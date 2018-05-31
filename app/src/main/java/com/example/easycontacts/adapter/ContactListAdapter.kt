@@ -8,6 +8,7 @@ import android.widget.TextView
 
 import com.example.easycontacts.R
 import com.example.easycontacts.model.db.Contact
+import kotlinx.android.synthetic.main.adapter_item_contact.view.*
 
 /**
  * Created by xkrej63 on 29.05.2018.
@@ -15,14 +16,13 @@ import com.example.easycontacts.model.db.Contact
 
 class ContactListAdapter() : RecyclerView.Adapter<ContactListAdapter.ViewHolder>() {
 
-    private var contacts: List<Contact>? = null
+    var contacts: List<Contact>? = null
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
 
-    var listener: OnContactItemInteracted? = null
-
-    fun setContacts(contacts: List<Contact>) {
-        this.contacts = contacts
-        notifyDataSetChanged()
-    }
+    var listener: ((Contact) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -42,21 +42,13 @@ class ContactListAdapter() : RecyclerView.Adapter<ContactListAdapter.ViewHolder>
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         fun onBind(contact: Contact) {
-            val textTitleView = itemView.findViewById<TextView>(R.id.textTitleView)
-            val textSubtitleView = itemView.findViewById<TextView>(R.id.textSubtitleView)
-
-            textTitleView.text = contact.displayName
-            textSubtitleView.text = contact.primaryContactInfo
+            itemView.textTitleView.text = contact.displayName
+            itemView.textSubtitleView.text = contact.primaryContactInfo
 
             itemView.setOnClickListener {
-                if (listener != null) {
-                    listener!!.onContactClicked(contact)
-                }
+                listener?.invoke(contact)
             }
         }
     }
 
-    interface OnContactItemInteracted {
-        fun onContactClicked(contact: Contact)
-    }
 }
