@@ -9,18 +9,45 @@ import java.util.ArrayList
 import java.util.Collections
 
 /**
- * Created by xkrej63 on 29.05.2018.
+ * Example JSON.
+ *    {
+ *        "uuid":"73de2853-e0b2-4b26-9897-ce7f224a7432",
+ *        "title_before":"Ing.",
+ *        "first_name":"Jana",
+ *        "middle_name":"Nova",
+ *        "last_name":"Novakova",
+ *        "title_after":"CSc.",
+ *        "emails":[
+ *            {
+ *                "type":"personal",
+ *                "email":"jana.novakova@seznam.cz"
+ *            }
+ *        ],
+ *        "addresses":[
+ *            {
+ *                "type":"home",
+ *                "address":"jkjkjkjkj"
+ *            }
+ *        ],
+ *        "phones":[
+ *            {
+ *                "type":"personal",
+ *                "phone_number":"565656"
+ *            }
+ *        ],
+ *        "note":"best friend",
+ *        "organization":"Vysoka skola ekonomicka"
+ *    }
  */
-
 class Contact(
-        @Json(name = "uuid") var uuid: String,
-        @Json(name = "first_name") var firstName: String,
-        @Json(name = "last_name") var lastName: String,
-        @Json(name = "emails") var emails: List<Email>,
-        @Json(name = "addresses") var addresses: List<Address>,
-        @Json(name = "phones") var phones: List<Phone>,
-        @Json(name = "note") var note: String,
-        @Json(name = "organization") var organization: String) {
+        @field:Json(name = "uuid") var uuid: String,
+        @field:Json(name = "first_name") var firstName: String,
+        @field:Json(name = "last_name") var lastName: String,
+        @field:Json(name = "emails") var emails: List<Email>,
+        @field:Json(name = "addresses") var addresses: List<Address>,
+        @field:Json(name = "phones") var phones: List<Phone>,
+        @field:Json(name = "note") var note: String,
+        @field:Json(name = "organization") var organization: String) {
 
 
     companion object {
