@@ -14,4 +14,6 @@
     <string name="delete_confirmation_description">Are you sure you want to delete this contact?</string>
     <string name="user_id">User ID</string>
     <string name="login">Login</string>
+    <string name="requesting_permission">Requesting permission</string>
+    <string name="requesting_permission_description">We need contacts permission, because this is contacts app ...</string>
 </resources>

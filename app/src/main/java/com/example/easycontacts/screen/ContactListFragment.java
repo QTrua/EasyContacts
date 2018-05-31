@@ -1,13 +1,21 @@
 package com.example.easycontacts.screen;
 
 
+import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +32,8 @@ import java.util.List;
  * A simple {@link Fragment} subclass.
  */
 public class ContactListFragment extends Fragment {
+
+    private static final int REQ_CONTACT_READ_REQ = 101;
 
     private ContactRepository contactRepository;
 
@@ -75,6 +85,59 @@ public class ContactListFragment extends Fragment {
             }
         });
 
+        requestAndLoadContacts();
+    }
+
+    private void requestAndLoadContacts() {
+        int permitted = ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_CONTACTS);
+        if (permitted != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.READ_CONTACTS)) {
+                showPermissionsRationale();
+            } else {
+                doRequestPermission();
+            }
+        } else {
+            doLoadContacts();
+        }
+    }
+
+    private void doRequestPermission() {
+        requestPermissions(new String[]{Manifest.permission.READ_CONTACTS},
+                REQ_CONTACT_READ_REQ);
+    }
+
+    private void showPermissionsRationale() {
+        AlertDialog dialog = new AlertDialog.Builder(getContext())
+                .setTitle(R.string.requesting_permission)
+                .setMessage(R.string.requesting_permission_description)
+                .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+
+                        doRequestPermission();
+                    }
+                })
+                .create();
+
+        dialog.show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode) {
+            case REQ_CONTACT_READ_REQ: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    requestAndLoadContacts();
+                }
+            }
+        }
+    }
+
+    private void doLoadContacts() {
         contactRepository.listLocalContacts(new ContactRepository.ContactCallback() {
             @Override
             public void withContacts(List<Contact> contacts) {
@@ -82,7 +145,6 @@ public class ContactListFragment extends Fragment {
             }
         });
     }
-
 
     @Override
     public void onAttach(Context context) {

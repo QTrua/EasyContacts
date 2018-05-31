@@ -1,9 +1,11 @@
 package com.example.easycontacts.screen;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.example.easycontacts.R;
 import com.example.easycontacts.model.db.Contact;
