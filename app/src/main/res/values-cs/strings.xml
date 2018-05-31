@@ -12,6 +12,6 @@
     <string name="delete_confirmation_description">Jste si jisti, že chcete smazat tento kontakt?</string>
     <string name="user_id">Uživatelské ID</string>
     <string name="login">Přihlášení</string>
-    <string name="requesting_permission">Žádnost o práva</string>
+    <string name="requesting_permission">Žádost o práva</string>
     <string name="requesting_permission_description">Potřebujeme oprávnění pro přístup k vašim kontaktům, protože používáte aplikaci na kontakty …</string>
 </resources>
