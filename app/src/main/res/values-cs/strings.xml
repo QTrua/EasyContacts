@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kontakty</string>
+    <string name="first_name">Křestní jméno</string>
+    <string name="last_name">Příjmení</string>
+    <string name="phone">Telefonní číslo</string>
+    <string name="email">E-mail</string>
+    <string name="address">Adresa</string>
+    <string name="send">Odeslat</string>
+    <string name="delete_contact">Smazat kontakt</string>
+    <string name="delete_confirmation">Potvrzení smazání</string>
+    <string name="delete_confirmation_description">Jste si jisti, že chcete smazat tento kontakt?</string>
+    <string name="user_id">Uživatelské ID</string>
+    <string name="login">Přihlášení</string>
+    <string name="requesting_permission">Žádnost o práva</string>
+    <string name="requesting_permission_description">Potřebujeme oprávnění pro přístup k vašim kontaktům, protože používáte aplikaci na kontakty …</string>
+</resources>
