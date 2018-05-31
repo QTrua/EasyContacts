@@ -112,7 +112,7 @@ class ContactListFragment : Fragment() {
     }
 
     private fun doLoadContacts() {
-        contactRepository!!.listLocalContacts(object : ContactRepository.ContactCallback {
+        contactRepository!!.listContacts(object : ContactRepository.ContactCallback {
             override fun withContacts(contacts: List<Contact>) {
                 contactListAdapter.contacts = contacts
             }
