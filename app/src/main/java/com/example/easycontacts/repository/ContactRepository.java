@@ -1,8 +1,11 @@
 package com.example.easycontacts.repository;
 
 import android.arch.persistence.room.Room;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
@@ -29,6 +32,8 @@ public class ContactRepository {
 
     private AppDatabase db;
 
+    private ContentResolver contentResolver;
+
     public ContactRepository(Context context) {
         SharedPreferences preferences = context.
                 getSharedPreferences(MainActivity.SHARED_PREF_KEY, Context.MODE_PRIVATE);
@@ -38,6 +43,8 @@ public class ContactRepository {
         db = Room.databaseBuilder(context, AppDatabase.class, "contacts")
                 .allowMainThreadQueries()
                 .build();
+
+        contentResolver = context.getContentResolver();
     }
 
     public void listContacts(final ContactCallback callback) {
@@ -64,6 +71,82 @@ public class ContactRepository {
                         callback.withContacts(contacts);
                     }
                 });
+    }
+
+    public void listLocalContacts(ContactCallback callback) {
+        Cursor cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI,
+                null, null, null,
+                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
+
+        List<Contact> contacts = new ArrayList<>();
+        if (cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                String id = cursor.getString(
+                        cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                String name = cursor.getString(
+                        cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+
+                Contact contact = new Contact();
+
+                contact.setUUID(id);
+                contact.setFirstName(name);
+
+                Cursor phoneCursor = contentResolver.query(
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                        null,
+                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
+                        new String[]{id},
+                        null
+                );
+
+                if (phoneCursor.moveToNext()) {
+                    String phoneNumber = phoneCursor.getString(
+                            phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                    contact.setPhone(phoneNumber);
+                }
+
+                phoneCursor.close();
+
+                Cursor emailCursor = contentResolver.query(
+                        ContactsContract.CommonDataKinds.Email.CONTENT_URI,
+                        null,
+                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?",
+                        new String[]{id},
+                        null
+                );
+
+                if (emailCursor.moveToNext()) {
+                    String email = emailCursor.getString(
+                            emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS)
+                    );
+                    contact.setEmail(email);
+                }
+                emailCursor.close();
+
+                Cursor addressCursor = contentResolver.query(
+                        ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_URI,
+                        null,
+                        ContactsContract.CommonDataKinds.StructuredPostal.CONTACT_ID + " = ?",
+                        new String[]{id},
+                        null
+                );
+
+                if (addressCursor.moveToNext()) {
+                    String address = addressCursor.getString(
+                            addressCursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS)
+                    );
+                    contact.setAddress(address);
+                }
+
+                addressCursor.close();
+
+                contacts.add(contact);
+            }
+        }
+
+        cursor.close();
+
+        callback.withContacts(contacts);
     }
 
     public void saveContact(Contact contact, final SaveCallback callback) {

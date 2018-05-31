@@ -75,7 +75,7 @@ public class ContactListFragment extends Fragment {
             }
         });
 
-        contactRepository.listContacts(new ContactRepository.ContactCallback() {
+        contactRepository.listLocalContacts(new ContactRepository.ContactCallback() {
             @Override
             public void withContacts(List<Contact> contacts) {
                 contactListAdapter.setContacts(contacts);
