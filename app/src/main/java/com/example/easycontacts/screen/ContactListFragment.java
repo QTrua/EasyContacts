@@ -138,7 +138,7 @@ public class ContactListFragment extends Fragment {
     }
 
     private void doLoadContacts() {
-        contactRepository.listLocalContacts(new ContactRepository.ContactCallback() {
+        contactRepository.listContacts(new ContactRepository.ContactCallback() {
             @Override
             public void withContacts(List<Contact> contacts) {
                 contactListAdapter.setContacts(contacts);
